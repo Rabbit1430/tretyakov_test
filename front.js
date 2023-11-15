@@ -154,7 +154,7 @@ task()
   //Добавление пользователя
 
   async function addUser() {
-    if (!selectid || !familya.value || !named.value || !surname.value) {
+    if ( !familya.value || !named.value || !surname.value) {
       err = "Выберите пользователя или заполните поля";
       errordivtext();
       return;
@@ -177,6 +177,7 @@ task()
 
       if (data.error) {
         err = data.error;
+        errordivtext();
       } else {
         err = "";
         getUser();
@@ -341,7 +342,7 @@ kvadrat.style.border = "1px solid black";
 
 var newkvadrat = kvadrat;
 
-for (var i = 0; i < count; i++) {
+for (var i = 0; i < 8; i++) {
     var mykvadrat = document.createElement("div");
     mykvadrat.classList.add("kvadrat");
     mykvadrat.style.width = "85%";
