@@ -1,18 +1,63 @@
 /** @format */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded",  function () {
   // Получить данные при загрузке страницы
 
+
+  //задание 1
+async function task() {
+  try {
+    await Promise.all([
+      sendpost("http://localhost:3000/backend1"),
+      sendpost("http://localhost:3000/backend2"),
+      sendpost("http://localhost:3000/backend3"),
+    ]);
+    allSuccess();
+  } catch (error) {
+    console.error("Ошибка:", error.message);
+  }
+
+  async function sendpost(url) {
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    if (response.ok) {
+      const data = await response.text();
+      console.log("Данные с сервера:", data);
+    } else {
+      throw new Error("Ошибка в запросе на сервер");
+    }
+  }
+
+  function allSuccess() {
+    alert("УРА!");
+  }
+}
+task()
+
+
+
+//задание 2
+
+
   //переменные
-  var select = null; // через нее отслеживаю событие
+  var select = null; 
   var selectid = null;
+  var h1 = document.createElement("h1");
+  var h2 = document.createElement("h1");
   var table = document.createElement("table");
   var thead = document.createElement("thead");
   var tbody = document.createElement("tbody");
   var err = "";
   var users = [];
 
-  // Создание таблицы
+  //  таблица
+ 
+  h1.textContent ="Таблица"
+  h2.textContent ="Поля"
+  
+  document.body.appendChild(h1);
 
   table.id = "usertable";
   table.style.borderCollapse = "collapse";
@@ -20,8 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
   table.style.margin = "20px 0";
   table.style.cursor = "pointer";
   document.body.appendChild(table);
-
-  // Создание заголовка таблицы
 
   var tr = document.createElement("tr");
   const data = ["Фамилия", "Имя", "Отчество"];
@@ -37,9 +80,20 @@ document.addEventListener("DOMContentLoaded", function () {
   thead.appendChild(tr);
   table.appendChild(thead);
 
-  // Создание тела таблицы
-
   table.appendChild(tbody);
+
+  document.body.appendChild(h2);
+
+  //Ошибки 
+  var errordiv = document.createElement("div");
+  document.body.appendChild(errordiv);
+
+
+  function errordivtext() {
+
+    errordiv.textContent = err;
+    errordiv.style.color='red'
+  }
 
   //Получение пользователей
   async function getUser() {
@@ -52,15 +106,15 @@ document.addEventListener("DOMContentLoaded", function () {
       updateTable();
     } catch (error) {
       err = error.message;
+      errordivtext();
     }
   }
 
   getUser();
 
-  // Обновление таблицы с данными
+  // Обновление таблицы 
   function updateTable() {
     tbody.innerHTML = "";
-    // Добавить каждого пользователя в таблицу
     users.forEach(function (user) {
       const row = tbody.insertRow();
       row.id = user.id;
@@ -68,28 +122,30 @@ document.addEventListener("DOMContentLoaded", function () {
       for (item of data) {
         var cell = row.insertCell();
         cell.appendChild(document.createTextNode(item));
-        applyCellStyle(cell);
+        cellstyle(cell);
       }
 
-      // Добавляем обработчик события для изменения цвета фона и обновления инпутов при клике
+      // изменения цвета фона и аптейд инпутов при клике
       row.addEventListener("click", function () {
         if (selectid !== null) {
-          // Сбрасываем цвет фона для предыдущей выбранной строки
+          
           selectid.style.backgroundColor = "";
         }
 
         if (selectid !== row) {
-          // Устанавливаем цвет фона для новой выбранной строки
+          
           row.style.backgroundColor = "lightgrey";
-          selectid = row; // Обновляем текущую выбранную строку
+          selectid = row; 
+          err = "";
+      errordivtext();
 
-          // Обновляем значения инпутов
+       
           updateInputs(row);
         } else {
-          // Если кликнули снова на ту же строку, снимаем выделение и очищаем инпуты
+         
           select = null;
           selectid = null;
-          clearInputFields();
+          clearInput();
         }
       });
     });
@@ -98,6 +154,11 @@ document.addEventListener("DOMContentLoaded", function () {
   //Добавление пользователя
 
   async function addUser() {
+    if (!selectid || !familya.value || !named.value || !surname.value) {
+      err = "Выберите пользователя или заполните поля";
+      errordivtext();
+      return;
+    }
     const adduser = "http://localhost:3000/users/add";
     const userData = {
       familya: familya.value,
@@ -120,17 +181,20 @@ document.addEventListener("DOMContentLoaded", function () {
         err = "";
         getUser();
         // updateTable(users);
-        clearInputFields();
+        clearInput();
       }
     } catch (error) {
       console.error(error);
+      err = error.message;
+      errordivtext();
     }
   }
 
-  // Изменение данных в таблице
+  // Изменить ФИО
   async function updateUser() {
     if (!selectid || !familya.value || !named.value || !surname.value) {
       err = "Выберите пользователя";
+      errordivtext();
       return;
     }
     const updateuser = "http://localhost:3000/users/update";
@@ -156,10 +220,12 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
           err = "";
           getUser();
-          clearInputFields();
+          clearInput();
         }
       } catch (error) {
         console.error(error);
+        err = error.message;
+       errordiv();
       }
     }
   }
@@ -169,6 +235,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function deleteUser() {
     if (!selectid || !selectid.id) {
       err = "Выберите пользователя";
+      errordivtext();
       return;
     }
 
@@ -187,14 +254,14 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         err = "";
         getUser();
-        clearInputFields();
+        clearInput();
       }
     } catch (error) {
       console.error(error);
     }
   }
 
-  // Функция для обновления значений инпутов при выборе строки
+  //подстановка данных в инпуты
   function updateInputs(row) {
     var cells = row.cells;
     familya.value = cells[0].textContent;
@@ -203,33 +270,24 @@ document.addEventListener("DOMContentLoaded", function () {
     selectid.dataset.userId = row.id;
   }
 
-  //   function updateUser() {
-  //     var selectedRow = tbody.getElementsByTagName("tr")[0]; // Первая строка
-  //     ["familya", "name", "surname"].forEach(function (id, index) {
-  //       selectedRow.cells[index].innerHTML = document.getElementById(id).value;
-  //       applyCellStyle(selectedRow.cells[index]);
-  //     });
-  //     clearInputFields();
-  //   }
 
-  function deleteUser() {
-    tbody.deleteRow(0); // Удалить первую строку
-    clearInputFields();
-  }
 
-  function applyCellStyle(cell) {
+  function cellstyle(cell) {
     cell.style.border = "1px solid black";
     cell.style.padding = "10px";
     cell.style.textAlign = "left";
   }
 
-  function clearInputFields() {
-    [familya, named, surname].forEach(function (input) {
-      input.value = "";
-    });
+  function clearInput() {
+    const dataint = [familya, named, surname]
+   for (int of dataint) {
+      int.value = "";
+    };
   }
 
-  // Создание элементов управления после создания таблицы
+ 
+
+  // Инпуты
   var createInput = function (type, placeholder) {
     var input = document.createElement("input");
     input.type = type;
@@ -239,11 +297,12 @@ document.addEventListener("DOMContentLoaded", function () {
     return input;
   };
 
-  var createButton = function (id, text, clickHandler) {
+//кнопки
+  var createButton = function (id, text, clicked) {
     var button = document.createElement("button");
     button.id = id;
     button.appendChild(document.createTextNode(text));
-    button.onclick = clickHandler;
+    button.onclick = clicked;
     button.style.margin = "10px";
     button.style.padding = "5px 10px";
     button.style.cursor = "pointer";
@@ -255,7 +314,56 @@ document.addEventListener("DOMContentLoaded", function () {
   var named = createInput("text", "Имя");
   var surname = createInput("text", "Отчество");
 
-  var addBtn = createButton("addBtn", "Добавить", addUser);
-  var updateBtn = createButton("updateBtn", "Изменить", updateUser);
-  var deleteBtn = createButton("deleteBtn", "Удалить", deleteUser);
+createButton("addBtn", "Добавить", addUser);
+   createButton("updateBtn", "Изменить", updateUser);
+  createButton("deleteBtn", "Удалить", deleteUser);
+
+
+
+
+  //задание 3
+
+;
+  
+
+  var task3 = document.createElement("div");
+task3.classList.add("task3");
+let count = 8 // число квадратов
+
+var kvadrat = document.createElement("div");
+kvadrat.classList.add("kvadrat");
+kvadrat.style.width = "100px";
+kvadrat.style.height = "100px";
+kvadrat.style.display = "flex";
+kvadrat.style.alignItems = "center";
+kvadrat.style.justifyContent = "center";
+kvadrat.style.border = "1px solid black";
+
+var newkvadrat = kvadrat;
+
+for (var i = 0; i < count; i++) {
+    var mykvadrat = document.createElement("div");
+    mykvadrat.classList.add("kvadrat");
+    mykvadrat.style.width = "85%";
+    mykvadrat.style.height = "85%";
+    mykvadrat.style.border = "1px solid black";
+    mykvadrat.style.display = "flex";
+    mykvadrat.style.alignItems = "center";
+    mykvadrat.style.justifyContent = "center";
+    
+    newkvadrat.appendChild(mykvadrat);
+    newkvadrat = mykvadrat; 
+}
+
+task3.appendChild(kvadrat);
+document.body.appendChild(task3);
+  
+  
+  
+
+
+
 });
+
+
+
