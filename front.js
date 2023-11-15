@@ -1,7 +1,7 @@
 /** @format */
 
 document.addEventListener("DOMContentLoaded",  function () {
-  // Получить данные при загрузке страницы
+ 
 
 
   //задание 1
@@ -264,7 +264,7 @@ task()
 
   //подстановка данных в инпуты
   function updateInputs(row) {
-    var cells = row.cells;
+    var cells = row.cells; 
     familya.value = cells[0].textContent;
     named.value = cells[1].textContent;
     surname.value = cells[2].textContent;
